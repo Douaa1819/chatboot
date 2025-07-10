@@ -94,10 +94,65 @@
     button:hover {
       background: #1e293b;
     }
+
+    /* --- Modal de bienvenue --- */
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 400px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+
+    .modal-content h2 {
+      margin-top: 0;
+    }
+
+    .modal-content p {
+      margin: 1rem 0;
+      color: #334155;
+    }
+
+    .modal-content button {
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: #0f172a;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .modal-content button:hover {
+      background: #1e293b;
+    }
   </style>
 </head>
 <body>
 
+  <!-- Modal de bienvenue -->
+  <div id="welcomeModal" class="modal">
+    <div class="modal-content">
+      <h2>Bienvenue !</h2>
+      <p>Ce chatbot va vous poser des questions pour établir un diagnostic numérique personnalisé.</p>
+      <button id="startChat">Commencer</button>
+    </div>
+  </div>
+
+  <!-- Chatbot -->
   <div class="chat-container">
     <div class="chat-header">🤖 Agent Conversationnel</div>
     <div id="chat" class="chatbox"></div>
@@ -108,7 +163,7 @@
   </div>
 
   <script>
-    const webhookUrl = 'https://n8n.srv787725.hstgr.cloud/webhook/agent-chat'; 
+    const webhookUrl = 'https://n8n.srv787725.hstgr.cloud/webhook/agent-chat';
     let questionIndex = 0;
     const chatDiv = document.getElementById('chat');
 
@@ -138,8 +193,15 @@
       }
     };
 
+    // Gestion du modal de bienvenue
     window.onload = () => {
-      askQuestion();
+      const modal = document.getElementById('welcomeModal');
+      const startBtn = document.getElementById('startChat');
+
+      startBtn.onclick = () => {
+        modal.style.display = 'none';
+        askQuestion(); // Démarre la première question
+      };
     };
 
     document.getElementById('chatForm').addEventListener('submit', async (e) => {
