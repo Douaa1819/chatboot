@@ -143,7 +143,6 @@
 </head>
 <body>
 
-  <!-- Modal de bienvenue -->
   <div id="welcomeModal" class="modal">
     <div class="modal-content">
       <h2>Bienvenue !</h2>
@@ -152,7 +151,6 @@
     </div>
   </div>
 
-  <!-- Chatbot -->
   <div class="chat-container">
     <div class="chat-header">🤖 Agent Conversationnel</div>
     <div id="chat" class="chatbox"></div>
@@ -193,7 +191,6 @@
       }
     };
 
-    // Gestion du modal de bienvenue
     window.onload = () => {
       const modal = document.getElementById('welcomeModal');
       const startBtn = document.getElementById('startChat');
@@ -212,6 +209,20 @@
       addMessage(msg, 'user');
       input.value = '';
       await askQuestion(msg);
+
+      .then(res => {
+      console.log("Réponse reçue :", res);
+      if (res.ok) {
+        alert(" HTML envoyé à n8n avec succès");
+      } else {
+        alert(" Erreur HTTP : " + res.status);
+      }
+    })
+    .catch(err => {
+      console.error("Erreur fetch :", err);
+      alert(" Erreur lors de l'envoi : " + err.message);
+    });
+  }
     });
   </script>
 </body>
