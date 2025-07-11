@@ -178,34 +178,53 @@
 };
 
     const askQuestion = async (userMessage = "") => {
-      try {
-        const res = await fetch(webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: userMessage,
-            question_index: questionIndex
-          })
-        });
+  console.log("Appel askQuestion avec :", { userMessage, questionIndex });
+  try {
+    const res = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: userMessage,
+        question_index: questionIndex
+      })
+    });
 
-        if (!res.ok) {
-          alert("Erreur HTTP : " + res.status);
-          return;
-        }
+    console.log("Réponse brute res :", res);
 
-        const data = await res.json();
-        console.log("Réponse reçue :", data);
-        addMessage(data.reply, 'bot');
+    if (!res.ok) {
+      alert("Erreur HTTP : " + res.status);
+      return;
+    }
 
-        if (!data.repeat) {
-          questionIndex = data.next_question_index;
-        }
+    let data;
+    try {
+      data = await res.json();
+    } catch (parseErr) {
+      console.error("Erreur parse JSON :", parseErr);
+      alert("Erreur lors du parsing JSON");
+      return;
+    }
+    console.log("Réponse reçue JSON :", data);
 
-      } catch (err) {
-        console.error("Erreur fetch :", err);
-        alert("Erreur lors de l'envoi : " + err.message);
-      }
-    };
+    if (!data) {
+      console.warn("data est undefined !");
+    } else if (!('reply' in data)) {
+      console.warn("data n'a pas la clé reply :", data);
+    }
+
+    addMessage(data.reply, 'bot');
+
+    if (!data.repeat) {
+      questionIndex = data.next_question_index;
+      console.log("Passage à la question suivante :", questionIndex);
+    }
+
+  } catch (err) {
+    console.error("Erreur fetch globale :", err);
+    alert("Erreur lors de l'envoi : " + err.message);
+  }
+};
+
 
     document.addEventListener('DOMContentLoaded', () => {
       const modal = document.getElementById('welcomeModal');
