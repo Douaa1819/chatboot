@@ -161,69 +161,68 @@
   </div>
 
   <script>
-    const webhookUrl = 'https://n8n.srv787725.hstgr.cloud/webhook/agent-chat';
-    let questionIndex = 0;
-    const chatDiv = document.getElementById('chat');
+  const webhookUrl = 'https://n8n.srv787725.hstgr.cloud/webhook/agent-chat';
+  let questionIndex = 0;
+  const chatDiv = document.getElementById('chat');
 
-    const addMessage = (text, sender = 'bot') => {
-      const div = document.createElement('div');
-      div.className = `message ${sender}`;
-      div.innerText = text;
-      chatDiv.appendChild(div);
-      chatDiv.scrollTop = chatDiv.scrollHeight;
-    };
+  const addMessage = (text, sender = 'bot') => {
+    const div = document.createElement('div');
+    div.className = `message ${sender}`;
+    div.innerText = text;
+    chatDiv.appendChild(div);
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+  };
 
-    const askQuestion = async (userMessage = "") => {
+  const askQuestion = async (userMessage = "") => {
+    try {
       const res = await fetch(webhookUrl, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMessage,
           question_index: questionIndex
         })
       });
 
+      if (!res.ok) {
+        alert("Erreur HTTP : " + res.status);
+        return;
+      }
+
       const data = await res.json();
+      console.log("Réponse reçue :", data);
       addMessage(data.reply, 'bot');
 
       if (!data.repeat) {
         questionIndex = data.next_question_index;
       }
-    };
 
-    window.onload = () => {
-      const modal = document.getElementById('welcomeModal');
-      const startBtn = document.getElementById('startChat');
-
-      startBtn.onclick = () => {
-        modal.style.display = 'none';
-        askQuestion(); // Démarre la première question
-      };
-    };
-
-    document.getElementById('chatForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const input = document.getElementById('userInput');
-      const msg = input.value.trim();
-      if (!msg) return;
-      addMessage(msg, 'user');
-      input.value = '';
-      await askQuestion(msg);
-
-      .then(res => {
-      console.log("Réponse reçue :", res);
-      if (res.ok) {
-        alert(" HTML envoyé à n8n avec succès");
-      } else {
-        alert(" Erreur HTTP : " + res.status);
-      }
-    })
-    .catch(err => {
+    } catch (err) {
       console.error("Erreur fetch :", err);
-      alert(" Erreur lors de l'envoi : " + err.message);
-    });
-  }
-    });
-  </script>
+      alert("Erreur lors de l'envoi : " + err.message);
+    }
+  };
+
+  window.onload = () => {
+    const modal = document.getElementById('welcomeModal');
+    const startBtn = document.getElementById('startChat');
+
+    startBtn.onclick = () => {
+      modal.style.display = 'none';
+      askQuestion(); // Démarre la première question
+    };
+  };
+
+  document.getElementById('chatForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('userInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+    addMessage(msg, 'user');
+    input.value = '';
+    await askQuestion(msg);
+  });
+</script>
+
 </body>
 </html>
