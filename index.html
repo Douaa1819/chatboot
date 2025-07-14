@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Agent Conversationnel</title>
+  <title>Agent Conversationnels</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -164,9 +164,9 @@
   </div>
 
   <script>
-    const webhookUrl = 'https://n8n.srv787725.hstgr.cloud/webhook/agent-chat';
-    let questionIndex = 0;
-    const chatDiv = document.getElementById('chat');
+  const webhookUrl = 'https://n8n.srv787725.hstgr.cloud/webhook/agent-chat';
+let questionIndex = 0;
+const chatDiv = document.getElementById('chat');
 
     const addMessage = (text, sender = 'bot') => {
       const div = document.createElement('div');
@@ -213,25 +213,28 @@ const askQuestion = async (userMessage = "", currentIndex = 0) => {
 
 
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const modal = document.getElementById('welcomeModal');
-      const startBtn = document.getElementById('startChat');
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('welcomeModal');
+  const startBtn = document.getElementById('startChat');
 
-      startBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
-        askQuestion(); // Démarre la première question
-      });
+  startBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+    askQuestion("", questionIndex); // Premier appel, index 0
+  });
 
-      document.getElementById('chatForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const input = document.getElementById('userInput');
-        const msg = input.value.trim();
-        if (!msg) return;
-        addMessage(msg, 'user');
-        input.value = '';
-        await askQuestion(msg);
-      });
-    });
+  document.getElementById('chatForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('userInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+    addMessage(msg, 'user');
+    input.value = '';
+    await askQuestion(msg, questionIndex); // Toujours passer l'index courant !
+  });
+});
+
+
+
   </script>
 </body>
 </html>
