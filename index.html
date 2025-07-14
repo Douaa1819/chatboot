@@ -164,86 +164,88 @@
   </div>
 
   <script>
-    const webhookUrl = 'https://n8n.srv787725.hstgr.cloud/webhook/agent-chat';
-    let questionIndex = 0;
-    const chatDiv = document.getElementById('chat');
+  const webhookUrl = 'https://n8n.srv787725.hstgr.cloud/webhook/agent-chat';
+  let questionIndex = 0;
+  const chatDiv = document.getElementById('chat');
 
-    const addMessage = (text, sender = 'bot') => {
-      const div = document.createElement('div');
-      div.className = `message ${sender}`;
-      div.innerText = text;
-      chatDiv.appendChild(div);
-      chatDiv.scrollTop = chatDiv.scrollHeight;
-    };
+  const addMessage = (text, sender = 'bot') => {
+    const div = document.createElement('div');
+    div.className = `message ${sender}`;
+    div.innerText = text;
+    chatDiv.appendChild(div);
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+  };
+
 const askQuestion = async (userMessage = "", currentIndex = 0) => {
+  console.log("🔵 Envoi vers n8n → index =", currentIndex, " | message =", userMessage);
+
   try {
     const res = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: userMessage,
-        question_index: currentIndex 
+        question_index: currentIndex
       })
     });
 
     const data = await res.json();
+    console.log("🟢 Réponse de n8n :", data);
 
     if (!data || !('reply' in data)) {
-      console.warn("Réponse invalide :", data);
+      console.warn("⚠️ Réponse invalide :", data);
       return;
     }
 
     addMessage(data.reply, 'bot');
 
-  //   if (!data.repeat) {
-  //     questionIndex = data.next_question_index;
-  //     console.log("Passage à la question suivante :", questionIndex);
-  //   } else {
-  //     // repeat: on garde l'index actuel (questionIndex)
-  //     console.log("On répète la question :", questionIndex);
-  //   }
-  // } catch (err) {
-  //   console.error("Erreur fetch globale :", err);
-  //   alert("Erreur lors de l'envoi : " + err.message);
-  // }
-  
-    //updqteee de questionIndex à partir de la réponse n8n
-    questionIndex = data.question_index;
+    //  Seulement si l’utilisateur a répondu, on vérifie les index
+    if (userMessage && data.question_index !== currentIndex) {
+      console.warn("⚠️ Index incohérent reçu ! Front:", currentIndex, "| n8n:", data.question_index);
+    }
 
-    //  Si la réponse est correcte on passe à la suivante
-    if (!data.repeat && data.next_question_index !== undefined) {
+    // Mise à jour de l’index global pour la suite
+    if (data.repeat) {
+      console.log("🔁 Répétition de la question. Index conservé :", currentIndex);
+      questionIndex = currentIndex; 
+    } else {
       questionIndex = data.next_question_index;
+      console.log("➡️ Question suivante. Nouvel index :", questionIndex);
     }
 
     if (data.finished) {
-      console.log("Toutes les questions sont terminées.");
+      console.log("✅ Toutes les questions sont terminées.");
     }
+
   } catch (err) {
-    console.error("Erreur dans askQuestion :", err);
+    console.error("❌ Erreur dans askQuestion :", err);
   }
 };
 
 
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('welcomeModal');
+    const startBtn = document.getElementById('startChat');
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const modal = document.getElementById('welcomeModal');
-      const startBtn = document.getElementById('startChat');
-
-      startBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
-        askQuestion(); // Démarre la première question
-      });
-
-      document.getElementById('chatForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const input = document.getElementById('userInput');
-        const msg = input.value.trim();
-        if (!msg) return;
-        addMessage(msg, 'user');
-        input.value = '';
-        await askQuestion(msg);
-      });
+    startBtn.addEventListener('click', () => {
+      modal.style.display = 'none';
+      askQuestion("", questionIndex); // Démarre la première question
     });
-  </script>
+
+    document.getElementById('chatForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('userInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      addMessage(msg, 'user');
+      input.value = '';
+
+      // On envoie la réponse avec le bon index
+      await askQuestion(msg, questionIndex);
+    });
+  });
+</script>
+
 </body>
 </html>
