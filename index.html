@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Agent Conversationnels</title>
+  <title>Agent Conversationnel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -164,9 +164,9 @@
   </div>
 
   <script>
-  const webhookUrl = 'https://n8n.srv787725.hstgr.cloud/webhook/agent-chat';
-let questionIndex = 0;
-const chatDiv = document.getElementById('chat');
+    const webhookUrl = 'https://n8n.srv787725.hstgr.cloud/webhook/agent-chat';
+    let questionIndex = 0;
+    const chatDiv = document.getElementById('chat');
 
     const addMessage = (text, sender = 'bot') => {
       const div = document.createElement('div');
@@ -182,7 +182,7 @@ const askQuestion = async (userMessage = "", currentIndex = 0) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: userMessage,
-        question_index: currentIndex // ENVOIE TOUJOURS L'INDEX COURANT
+        question_index: currentIndex 
       })
     });
 
@@ -195,10 +195,22 @@ const askQuestion = async (userMessage = "", currentIndex = 0) => {
 
     addMessage(data.reply, 'bot');
 
-    //MÀJ de questionIndex à partir de la réponse n8n
+  //   if (!data.repeat) {
+  //     questionIndex = data.next_question_index;
+  //     console.log("Passage à la question suivante :", questionIndex);
+  //   } else {
+  //     // repeat: on garde l'index actuel (questionIndex)
+  //     console.log("On répète la question :", questionIndex);
+  //   }
+  // } catch (err) {
+  //   console.error("Erreur fetch globale :", err);
+  //   alert("Erreur lors de l'envoi : " + err.message);
+  // }
+  
+    //updqteee de questionIndex à partir de la réponse n8n
     questionIndex = data.question_index;
 
-    //  Si la réponse est correcte, on passe à la suivante
+    //  Si la réponse est correcte on passe à la suivante
     if (!data.repeat && data.next_question_index !== undefined) {
       questionIndex = data.next_question_index;
     }
@@ -213,28 +225,25 @@ const askQuestion = async (userMessage = "", currentIndex = 0) => {
 
 
 
-document.addEventListener('DOMContentLoaded', () => {
-  const modal = document.getElementById('welcomeModal');
-  const startBtn = document.getElementById('startChat');
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('welcomeModal');
+      const startBtn = document.getElementById('startChat');
 
-  startBtn.addEventListener('click', () => {
-    modal.style.display = 'none';
-    askQuestion("", questionIndex); // Premier appel, index 0
-  });
+      startBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+        askQuestion(); // Démarre la première question
+      });
 
-  document.getElementById('chatForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const input = document.getElementById('userInput');
-    const msg = input.value.trim();
-    if (!msg) return;
-    addMessage(msg, 'user');
-    input.value = '';
-    await askQuestion(msg, questionIndex); // Toujours passer l'index courant !
-  });
-});
-
-
-
+      document.getElementById('chatForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = document.getElementById('userInput');
+        const msg = input.value.trim();
+        if (!msg) return;
+        addMessage(msg, 'user');
+        input.value = '';
+        await askQuestion(msg);
+      });
+    });
   </script>
 </body>
 </html>
