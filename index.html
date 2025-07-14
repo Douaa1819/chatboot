@@ -175,36 +175,43 @@
       chatDiv.appendChild(div);
       chatDiv.scrollTop = chatDiv.scrollHeight;
     };
+const askQuestion = async (userMessage = "", currentIndex = 0) => {
+  try {
+    const res = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: userMessage,
+        question_index: currentIndex // ENVOIE TOUJOURS L'INDEX COURANT
+      })
+    });
 
-    const askQuestion = async (userMessage = "") => {
-      try {
-        const res = await fetch(webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: userMessage,
-            question_index: questionIndex
-          })
-        });
+    const data = await res.json();
 
-        if (!res.ok) {
-          alert("Erreur HTTP : " + res.status);
-          return;
-        }
+    if (!data || !('reply' in data)) {
+      console.warn("Réponse invalide :", data);
+      return;
+    }
 
-        const data = await res.json();
-        console.log("Réponse reçue :", data);
-        addMessage(data.reply, 'bot');
+    addMessage(data.reply, 'bot');
 
-        if (!data.repeat) {
-          questionIndex = data.next_question_index;
-        }
+    //MÀJ de questionIndex à partir de la réponse n8n
+    questionIndex = data.question_index;
 
-      } catch (err) {
-        console.error("Erreur fetch :", err);
-        alert("Erreur lors de l'envoi : " + err.message);
-      }
-    };
+    //  Si la réponse est correcte, on passe à la suivante
+    if (!data.repeat && data.next_question_index !== undefined) {
+      questionIndex = data.next_question_index;
+    }
+
+    if (data.finished) {
+      console.log("Toutes les questions sont terminées.");
+    }
+  } catch (err) {
+    console.error("Erreur dans askQuestion :", err);
+  }
+};
+
+
 
     document.addEventListener('DOMContentLoaded', () => {
       const modal = document.getElementById('welcomeModal');
