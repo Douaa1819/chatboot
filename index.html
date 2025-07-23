@@ -218,13 +218,8 @@
           console.warn("⚠️ Index incohérent reçu ! Front:", currentIndex, "| n8n:", data.question_index);
         }
 
-      if (data.repeat) {
-  console.log("🔁 Répétition de la question. Index conservé :", currentIndex);
-  questionIndex = currentIndex;
-} else {
-  questionIndex = data.next_question_index;
-  console.log("➡️ Question suivante. Nouvel index :", questionIndex);
-}
+questionIndex = data.question_index;
+console.log("📌 Index actuel corrigé :", questionIndex);
 
 
         if (data.finished) {
