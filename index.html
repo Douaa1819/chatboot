@@ -218,13 +218,14 @@
           console.warn("⚠️ Index incohérent reçu ! Front:", currentIndex, "| n8n:", data.question_index);
         }
 
-        if (data.repeat) {
-          console.log("🔁 Répétition de la question. Index conservé :", currentIndex);
-          questionIndex = currentIndex;
-        } else {
-          questionIndex = data.next_question_index;
-          console.log("➡️ Question suivante. Nouvel index :", questionIndex);
-        }
+      if (data.repeat) {
+  console.log("🔁 Répétition de la question. Index conservé :", currentIndex);
+  questionIndex = currentIndex;
+} else {
+  questionIndex = data.next_question_index;
+  console.log("➡️ Question suivante. Nouvel index :", questionIndex);
+}
+
 
         if (data.finished) {
           console.log("✅ Toutes les questions sont terminées.");
